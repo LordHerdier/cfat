@@ -287,7 +287,7 @@ void createfs(char* fsname) {
 
     // check if the file system file was created
     if (fsfile == NULL) {
-        fprintf(stderr, "Error creating file system, exiting\n");
+        fprintf(stderr, "Error creating file system (name not provided), exiting\n");
         exit(1);
     }
 
@@ -358,6 +358,8 @@ void printUsage(char* progname) {
     fprintf(stderr, "Note: The internal path should start with a forward slash (/)\n");
     fprintf(stderr, "Note: Maximum file/directory name length is 11 characters, including extension\n");
     fprintf(stderr, "Note: Passing no flags will result in the interactive console launching\n");
+    fprintf(stderr, "Note  Reading large files (>131kb or so) may have undocumented behavior when mounted\n");
+    fprintf(stderr, "\n");
     exit(1);
 }
 

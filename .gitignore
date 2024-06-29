@@ -5,3 +5,4 @@ hello/
 libfuse/
 mnt/
 helloFuse/
+.vscode/

@@ -1,0 +1,7 @@
+*.cfs
+*.myfs
+*.bak
+hello/
+libfuse/
+mnt/
+

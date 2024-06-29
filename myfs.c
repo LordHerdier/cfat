@@ -1885,52 +1885,75 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 }
 
 static int fs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-    // function to read data from a file
-    // this function is very similar to _extractFile, but uses the FUSE buffer to write the data to
-    // see _extractFile for more detailed comments
+    dirEntry* file = NULL;                     // file to read
+    unsigned short block = 0;                  // first block of the file
+    unsigned int fileSize = 0;                 // size of the file
+    unsigned int bytesRead = 0;                // number of bytes read
+    unsigned int bytesToRead = 0;              // number of bytes to read
+    unsigned int blockOffset = 0;              // offset within the block
+    char* localpath = strdup(path);            // duplicate the path for manipulation
 
-    unsigned short block = USHRT_MAX;
-    unsigned int bytesToWrite = 0;
-    char* localpath = malloc(strlen(path));
-    dirEntry* file = NULL;
-    (void) fi;
+    // check if the file system is loaded
+    fsLoadedCheck();
 
-    logMessage("Reading file %s\n", path);
-
-    strcpy(localpath, path);
+    // find the file to read
     file = findEntryFromPath(localpath, fuseRoot);
 
-    if (file == NULL || file->attributes & ATTR_DIRECTORY) {
+    // check if the file exists
+    if (file == NULL) {
         free(localpath);
         return -ENOENT;
     }
 
-    size = file->size;
+    // check if the file is a directory
+    if (file->attributes == ATTR_DIRECTORY) {
+        free(localpath);
+        return -EISDIR;
+    }
 
-    if (offset > size) {
+    // get the file's size and first block
+    fileSize = file->size;
+    block = file->first_cluster_low;
+
+    // check if offset is beyond file size
+    if (offset >= fileSize) {
         free(localpath);
         return 0;
     }
 
-    if (offset + size > size) {
-        size = size - offset;
+    // adjust size if read goes beyond file size
+    if (offset + size > fileSize) {
+        size = fileSize - offset;
     }
 
-    block = file->first_cluster_low;
-    bytesToWrite = size;
-
-    // loop through the blocks and write the data to the buffer
-    while (bytesToWrite > 0) {
-        unsigned int numBytes = (bytesToWrite > BLOCKSIZE) ? BLOCKSIZE : bytesToWrite;
-        memcpy(buf, &blocks[block].data, numBytes);
-        buf += numBytes;
-        bytesToWrite -= numBytes;
+    // navigate to the correct block based on the offset
+    while (offset >= BLOCKSIZE) {
         block = FAT[block];
+        offset -= BLOCKSIZE;
+    }
+
+    blockOffset = offset; // offset within the block
+    bytesRead = 0;
+
+    // read data block by block
+    while (size > 0) {
+        bytesToRead = (size > (BLOCKSIZE - blockOffset)) ? (BLOCKSIZE - blockOffset) : size;
+        memcpy(buf + bytesRead, blocks[block].data + blockOffset, bytesToRead);
+        size -= bytesToRead;
+        bytesRead += bytesToRead;
+        blockOffset = 0; // reset block offset for subsequent reads
+
+        // move to the next block if necessary
+        if (size > 0) {
+            block = FAT[block];
+            if (block == USHRT_MAX) {
+                break;
+            }
+        }
     }
 
     free(localpath);
-
-    return size;
+    return bytesRead;
 }
 
 static int fs_open(const char *path, struct fuse_file_info *fi) {

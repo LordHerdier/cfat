@@ -6,3 +6,4 @@ libfuse/
 mnt/
 helloFuse/
 .vscode/
+cfs

@@ -95,6 +95,22 @@ void setDirEntry(dirEntry* entry, char* name, char attributes,char create_time_t
                   short first_cluster_low, unsigned int size, char isLast);
 void writeBlockToFile(FILE* f, unsigned short block, unsigned short numBytes);
 
+// FUSE prototypes
+static int fs_create(const char *path, mode_t mode, struct fuse_file_info *fi);
+static int fs_getattr(const char *path, struct stat *st);
+static int fs_getxattr(const char *path, const char *name, char *value, size_t size);
+static int fs_mkdir(const char* path, mode_t mode);
+static int fs_open(const char *path, struct fuse_file_info *fi);
+static int fs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
+static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi);
+static int fs_release(const char *path, struct fuse_file_info *fi);
+static int fs_rmdir(const char *path);
+static int fs_setxattr(const char *path, const char *name, const char *value, size_t size, int flags);
+static int fs_statfs(const char *path, struct statvfs *st);
+static int fs_truncate(const char *path, off_t size);
+static int fs_unlink(const char *path);
+static int fs_utimens(const char *path, const struct timespec tv[2]);
+static int fs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
 // global variables
 char* fs = NULL;            //pointer to the memory mapped file system
@@ -1815,10 +1831,6 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 
     strcpy(localpath, path);
 
-    // if (strcmp (path, "/") != 0) {
-    //     return -ENOENT;
-    // }
-
     parentDirEntry = findEntryFromPath(localpath, fuseRoot);
 
     if (parentDirEntry == NULL) {
@@ -2095,22 +2107,6 @@ static int fs_write(const char *path, const char *buf, size_t size, off_t offset
 
         block = FAT[block];
     }
-
-    // if
-
-    // while (blockOffset > 0) {
-    //     block = FAT[block];
-    //     blockOffset--;
-    //     if (block == USHRT_MAX) {
-    //         logMessage("Allocating new block\n");
-    //         unsigned short newBlock = findFreeBlock();
-    //         FAT[block] = newBlock;
-    //         FAT[newBlock] = USHRT_MAX;
-    //         block = newBlock;
-    //     }
-    //     logMessage("\tBlock: %d\n", block);
-    //     logMessage("\tBlock offset: %d\n", blockOffset);
-    // }
 
     logMessage("Starting write at block %d\n", block);
 
@@ -2433,8 +2429,8 @@ static struct fuse_operations fuse_ops = {
 
 
 int mountfs(char* mountpath, char* filesystem) {
-    int fuse_argc = 3;
-    char* fuse_argv[3] = {"myfs", "-d", mountpath};
+    int fuse_argc = 2;
+    char* fuse_argv[2] = {"myfs", mountpath};
     int ret;
 
     fprintf(stderr, "Mounting filesystem %s at %s\n", filesystem, mountpath);

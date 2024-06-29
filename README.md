@@ -92,6 +92,11 @@ The program can be run with various options. Below are some common commands:
   ./cfs -f myfilesystem.CFAT -m /mnt/myfilesystem
   ```
 
+- **Unmount the filesystem**:
+  ```sh
+  fusermount -u /mnt/myfilesystem
+  ```
+
 - **Launch interactive mode**:
   ```sh
   ./cfs -f myfilesystem.CFAT -I

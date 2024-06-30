@@ -1319,6 +1319,12 @@ dirEntry* findEntryFromPath(char* intpath, dirEntry* parentDir) {
     logMessage("\tfindEntryFromPath: copying path, %s\n", intpath);
     strcpy(path, intpath);
 
+    // check if the path is the root
+    if (strcmp(path, "/") == 0) {
+        dirEntry* root = (dirEntry*)&blocks[0];
+        return root;
+    }
+
     // get the filename
     logMessage("\tfindEntryFromPath: extracting filename from path, %s\n", intpath);
     extract_filename(intpath, filename);

@@ -1324,6 +1324,11 @@ dirEntry* findEntryFromPath(char* intpath, dirEntry* parentDir) {
     extract_filename(intpath, filename);
     logMessage("\tfindEntryFromPath: extracted filename, %s\n", filename);
 
+    if (strcmp(filename, "") == 0) {
+        fprintf(stderr, "No filename provided\n");
+        return NULL;
+    }
+
     // tokenize the path and find the directory to extract the file from
     logMessage("Finding directory entry for file \"%s\" in %s\n", filename, intpath);
     token = strtok(path, "/");

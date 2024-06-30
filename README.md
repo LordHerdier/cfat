@@ -125,8 +125,13 @@ Once in the interactive shell, you can use the following commands:
 
 - **Fle Name Limits**: As this is based on the FAT32 spec, filenames are limited in size to 11 characters, including extension.
 - **File Size Limits**: Reading large files (>131KB) may have undocumented behavior.
-- **Stability**: As this is an educational project, some edge cases might not be handled perfectly.
-- **Mounting Issues**: Ensure that the mount path exists and you have the necessary permissions.
+- **Stability**: There be dragons.Don't store your taxes in this.
+- **Mounting Issues**: CRUD operation *generally* work, but aren't bullet-proof.
+  - `Transport endpint is not connected`: The program crashed. Run fusermount -d and re-mount.
+
+## Known Bugs
+- Attempting to edit a mounted file whose name is 11 characters long will result in a segfault
+- Using vim/emacs on a mounted file can be flaky. Nano seems to be more stable
 
 ## Author
 

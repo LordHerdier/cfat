@@ -1226,7 +1226,7 @@ dirEntry* findParentFromPath(char* path, dirEntry* parentDir) {
         dirEntry* foundEntry = findEntryInDirectory(currentDir, token);
         if (foundEntry == NULL) {
             fprintf(stderr, "Directory, %s, does not exist\n", token);
-            exit(1);
+            return NULL;
         }
         // move to the next directory in the path
         currentDir = foundEntry;
@@ -1278,7 +1278,7 @@ void addFile(char* filename, char* intpath, dirEntry* parentDir) {
         dirEntry* foundEntry = findEntryInDirectory(currentDir, token);
         if (foundEntry == NULL) {
             fprintf(stderr, "Directory, %s, does not exist, cannot add file\n", token);
-            exit(1);
+            return;
         }
         // move to the next directory in the path
         currentDir = foundEntry;
@@ -1288,7 +1288,7 @@ void addFile(char* filename, char* intpath, dirEntry* parentDir) {
     // check if the file name is too long
     if (strlen(basename(filename)) > MAXFILENAME) {
         fprintf(stderr, "File name is too long, cannot add file\n");
-        exit(1);
+        return;
     }
 
     // check if the file already exists
@@ -1316,10 +1316,13 @@ dirEntry* findEntryFromPath(char* intpath, dirEntry* parentDir) {
     fsLoadedCheck();
 
     // copy the directory path to a local variable
+    logMessage("\tfindEntryFromPath: copying path, %s\n", intpath);
     strcpy(path, intpath);
 
     // get the filename
+    logMessage("\tfindEntryFromPath: extracting filename from path, %s\n", intpath);
     extract_filename(intpath, filename);
+    logMessage("\tfindEntryFromPath: extracted filename, %s\n", filename);
 
     // tokenize the path and find the directory to extract the file from
     logMessage("Finding directory entry for file \"%s\" in %s\n", filename, intpath);
@@ -1431,7 +1434,7 @@ void extractFile(char* intpath, dirEntry* parentDir) {
     // check if the file exists
     if (file == NULL) {
         fprintf(stderr, "File, %s, does not exist\n", intpath);
-        exit(1);
+        return;
     }
 
     // extract the file
@@ -1484,19 +1487,26 @@ void removeDirectoryEntry(char* intpath, dirEntry* rootDir) {
     // get the parent directory of the entry and the block index
     extract_path(intpath, parentPath);  // get the parent directory path (without the filename)
     parentDir = findParentFromPath(parentPath, rootDir);
+
+    // check if the parent directory exists
+    if (parentDir == NULL) {
+        fprintf(stderr, "Parent directory of \"%s\" does not exist, cannot remove\n", intpath);
+        return;
+    }
+
     blockIndex = parentDir->first_cluster_low;
 
     // check if the entry is valid
     if (entry == NULL) {
         fprintf(stderr, "File or directory \"%s\" does not exist, cannot remove\n", intpath);
-        exit(1);
+        return;
     }
 
     // check if the entry is a directory, check if it is empty
     if (entry->attributes == ATTR_DIRECTORY) {
         if (!isDirectoryEmpty(entry)) {
             fprintf(stderr, "Directory \"%s\" is not empty, cannot remove\n", intpath);
-            exit(1);
+            return;
         }
     }
 
@@ -2351,7 +2361,11 @@ static int fs_truncate(const char *path, off_t size) {
     (void) size;
 
     strcpy(localpath, path);
+
+    logMessage("Truncating file %s to size %ld\n", path, size);
+
     file = findEntryFromPath(localpath, fuseRoot);
+
 
     if (file == NULL || file->attributes & ATTR_DIRECTORY) {
         free(localpath);
@@ -2429,13 +2443,24 @@ static struct fuse_operations fuse_ops = {
 
 
 int mountfs(char* mountpath, char* filesystem) {
-    int fuse_argc = 2;
-    char* fuse_argv[2] = {"myfs", mountpath};
+    int fuse_argc;
+    char* fuse_argv[3];
     int ret;
 
     fprintf(stderr, "Mounting filesystem %s at %s\n", filesystem, mountpath);
 
     fuseRoot = (dirEntry*)&blocks[0];
+
+    fuse_argv[0] = "cfs";
+    fuse_argv[1] = mountpath;
+
+    if (verbose == 1) {
+        logMessage("Mounting filesystem in debug mode\n");
+        fuse_argv[2] = "-d";
+        fuse_argc = 3;
+    } else {
+        fuse_argc = 2;
+    }
 
     ret = fuse_main(fuse_argc, fuse_argv, &fuse_ops, NULL);
 

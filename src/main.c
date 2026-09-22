@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     while ((opt = getopt(argc, argv, "f:clvi:a:r:d:e:Im:h")) != -1) {
         switch (opt) {
         case 'f': // file system name
-            fsname = malloc(strlen(optarg));
+            fsname = malloc(strlen(optarg) + 1);
             strcpy(fsname, optarg);
             break;
         case 'c': // create a new file system
@@ -46,11 +46,11 @@ int main(int argc, char *argv[]) {
             break;
         case 'a': // add a file to the file system
             add_flag = 1;
-            filename = malloc(strlen(optarg));
+            filename = malloc(strlen(optarg) + 1);
             strcpy(filename, optarg);
             break;
         case 'i': // internal path of file to add
-            intpath = malloc(strlen(optarg));
+            intpath = malloc(strlen(optarg) + 1);
             strcpy(intpath, optarg);
             break;
         case 'r': // remove a file from the file system
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
             break;
         case 'd': // add a directory to the file system
             add_dir_flag = 1;
-            filename = malloc(strlen(optarg));
+            filename = malloc(strlen(optarg) + 1);
             strcpy(filename, optarg);
             break;
         case 'e': // extract a file from the file system

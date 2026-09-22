@@ -21,7 +21,7 @@ static dirEntry* fuseRoot = NULL;
 
 static int fs_getattr(const char *path, struct stat *st) {
     int res = 0;
-    char* localpath = malloc(strlen(path));
+    char* localpath = malloc(strlen(path) + 1);
     dirEntry* file = NULL;
     int numSubdirs = 0;
 
@@ -79,7 +79,7 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
     dirEntry* parentDirEntry = NULL;
     dirEntry* currentDirEntry = NULL;
     unsigned short currentDirEntryIndex = USHRT_MAX;
-    char* localpath = malloc(strlen(path));
+    char* localpath = malloc(strlen(path) + 1);
 
     logMessage("Reading directory %s\n", path);
 
@@ -225,7 +225,7 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 }
 
 static int fs_open(const char *path, struct fuse_file_info *fi) {
-    char* localpath = malloc(strlen(path));
+    char* localpath = malloc(strlen(path) + 1);
     dirEntry* file = NULL;
 
     logMessage("Opening file %s\n", path);
@@ -249,7 +249,7 @@ static int fs_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
     // this function is very similar to createEmptyFile
     // see createEmptyFile for more detailed comments
 
-    char *localpath = malloc(strlen(path));
+    char *localpath = malloc(strlen(path) + 1);
     dirEntry *parentDir = NULL;
     char parentPath[MAXPATH];
     char filename[MAXFILENAME];
@@ -277,7 +277,7 @@ static int fs_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
 }
 
 static int fs_mkdir(const char* path, mode_t mode) {
-    char *localpath = malloc(strlen(path));
+    char *localpath = malloc(strlen(path) + 1);
     dirEntry *parentDir = NULL;
     char parentPath[MAXPATH];
     char dirname[MAXFILENAME];
@@ -307,7 +307,7 @@ static int fs_write(const char *path, const char *buf, size_t size, off_t offset
     unsigned short block = USHRT_MAX;
     unsigned int bytesToWrite = 0;
     unsigned int bytesWritten = 0;
-    char *localpath = malloc(strlen(path));
+    char *localpath = malloc(strlen(path) + 1);
     dirEntry *file = NULL;
 
     (void) fi;
@@ -397,7 +397,7 @@ static int fs_write(const char *path, const char *buf, size_t size, off_t offset
 
 static int fs_rmdir(const char *path) {
     dirEntry *entry;
-    char *localpath = malloc(strlen(path));
+    char *localpath = malloc(strlen(path) + 1);
 
     logMessage("Removing directory %s\n", path);
 
@@ -421,7 +421,7 @@ static int fs_rmdir(const char *path) {
 
 static int fs_unlink(const char *path) {
     dirEntry *entry;
-    char *localpath = malloc(strlen(path));
+    char *localpath = malloc(strlen(path) + 1);
 
     logMessage("Unlinking file %s\n", path);
 
@@ -490,7 +490,7 @@ static int fs_release(const char *path, struct fuse_file_info *fi) {
 
 static int fs_getxattr(const char *path, const char *name, char *value, size_t size) {
     dirEntry *file;
-    char *localpath = malloc(strlen(path));
+    char *localpath = malloc(strlen(path) + 1);
 
     logMessage("Getting xattr %s for file %s\n", name, path);
 
@@ -530,7 +530,7 @@ static int fs_getxattr(const char *path, const char *name, char *value, size_t s
 
 static int fs_setxattr(const char *path, const char *name, const char *value, size_t size, int flags) {
     dirEntry *file;
-    char *localpath = malloc(strlen(path));
+    char *localpath = malloc(strlen(path) + 1);
 
     logMessage("Setting xattr %s for file %s\n", name, path);
 
@@ -560,7 +560,7 @@ static int fs_setxattr(const char *path, const char *name, const char *value, si
 
 static int fs_utimens(const char *path, const struct timespec tv[2]) {
     dirEntry *file;
-    char *localpath = malloc(strlen(path));
+    char *localpath = malloc(strlen(path) + 1);
     struct tm *tm;
     time_t t;
     short date, time;
@@ -600,7 +600,7 @@ static int fs_utimens(const char *path, const struct timespec tv[2]) {
 }
 
 static int fs_truncate(const char *path, off_t size) {
-    char* localpath = malloc(strlen(path));
+    char* localpath = malloc(strlen(path) + 1);
     dirEntry* file = NULL;
     (void) size;
 

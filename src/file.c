@@ -287,7 +287,7 @@ void addFile(char* filename, char* intpath, dirEntry* parentDir) {
     strcpy(path, intpath);
 
     // copy the filename to a local variable
-    char* file = malloc(strlen(filename));
+    char* file = malloc(strlen(filename) + 1);
 
     // tokenize the path and find the directory to add the file to
     token = strtok(path, "/");

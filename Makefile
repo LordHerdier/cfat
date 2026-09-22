@@ -1,5 +1,7 @@
+SRC := $(wildcard src/*.c)
+
 all:
-	gcc cfs.c -o cfs `pkg-config fuse --cflags --libs`
+	gcc $(SRC) -Isrc -o cfs `pkg-config fuse --cflags --libs`
 
 clean:
 	rm -f cfs

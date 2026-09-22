@@ -43,7 +43,7 @@ make
 Alternatively, you can compile the program manually with:
 
 ```sh
-gcc cfs.c -o cfs `pkg-config fuse --cflags --libs` --libs`
+gcc src/*.c -Isrc -o cfs `pkg-config fuse --cflags --libs`
 ```
 
 ## Usage Instructions
